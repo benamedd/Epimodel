@@ -1,10 +1,10 @@
-const CACHE_NAME = 'epimodel-v1.0.0';
+const CACHE_NAME = 'epimodel-v1.0.1';
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/icons/icon-192x192.png',
-  '/icons/icon-512x512.png',
+  './',
+  './index.html',
+  './manifest.json',
+  './icons/icon-192x192.png',
+  './icons/icon-512x512.png',
   'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js',
   'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',
   'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'
@@ -23,8 +23,7 @@ self.addEventListener('install', (event) => {
         console.error('[Service Worker] Erreur de mise en cache:', error);
       })
   );
-  // Force l'activation immédiate du nouveau Service Worker
-  self.skipWaiting();
+  self.skipWaiting(); // Activation immÃ©diate
 });
 
 // Activation du Service Worker
@@ -42,24 +41,20 @@ self.addEventListener('activate', (event) => {
       );
     })
   );
-  // Prend immédiatement le contrôle de toutes les pages
   return self.clients.claim();
 });
 
-// Stratégie de récupération: Network First avec fallback sur Cache
+// StratÃ©gie de rÃ©cupÃ©ration : Network First, fallback sur cache
 self.addEventListener('fetch', (event) => {
   event.respondWith(
     fetch(event.request)
       .then((response) => {
-        // Vérifier si la réponse est valide
+        // Si la rÃ©ponse est valide, on la met en cache
         if (!response || response.status !== 200 || response.type !== 'basic') {
           return response;
         }
 
-        // Cloner la réponse
         const responseToCache = response.clone();
-
-        // Mettre à jour le cache avec la nouvelle réponse
         caches.open(CACHE_NAME)
           .then((cache) => {
             cache.put(event.request, responseToCache);
@@ -68,18 +63,18 @@ self.addEventListener('fetch', (event) => {
         return response;
       })
       .catch(() => {
-        // Si le réseau échoue, essayer de récupérer depuis le cache
+        // Si la requÃªte rÃ©seau Ã©choue, on tente le cache
         return caches.match(event.request)
           .then((cachedResponse) => {
             if (cachedResponse) {
               return cachedResponse;
             }
-            
-            // Si pas dans le cache et que c'est une navigation, retourner index.html
+
+            // Si câ€™est une navigation et que rien nâ€™est trouvÃ©
             if (event.request.mode === 'navigate') {
-              return caches.match('/index.html');
+              return caches.match('./index.html');
             }
-            
+
             return new Response('Ressource non disponible hors ligne', {
               status: 404,
               statusText: 'Not Found'
@@ -89,12 +84,12 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
-// Gestion des messages du client
+// Gestion des messages du client (mise Ã  jour / vidage du cache)
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
-  
+
   if (event.data && event.data.type === 'CLEAR_CACHE') {
     event.waitUntil(
       caches.keys().then((cacheNames) => {

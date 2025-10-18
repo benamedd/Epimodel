@@ -1,18 +1,18 @@
 {
   "name": "EpiModel - Epidemiological Modeling",
   "short_name": "EpiModel",
-  "description": "Application d'analyse épidémiologique pour la pathologie végétale",
-  "start_url": "/index.html",
+  "description": "Application d'analyse Ã©pidÃ©miologique pour la pathologie vÃ©gÃ©tale",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#2e7d32",
   "theme_color": "#2e7d32",
   "orientation": "portrait-primary",
-  "scope": "/",
+  "scope": "./",
   "lang": "fr-FR",
   "dir": "ltr",
   "icons": [
     {
-      "src": "/icons/icon-72x72.png",
+      "src": "icons/icon-72x72.png",
       "sizes": "72x72",
       "type": "image/png",
       "purpose": "any maskable"
@@ -24,25 +24,25 @@
       "purpose": "any maskable"
     },
     {
-      "src": "/icons/icon-128x128.png",
+      "src": "icons/icon-128x128.png",
       "sizes": "128x128",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/icons/icon-144x144.png",
+      "src": "icons/icon-144x144.png",
       "sizes": "144x144",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/icons/icon-152x152.png",
+      "src": "icons/icon-152x152.png",
       "sizes": "152x152",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/icons/icon-192x192.png",
+      "src": "icons/icon-192x192.png"
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
@@ -79,7 +79,7 @@
     {
       "name": "Nouvelle Analyse",
       "short_name": "Analyse",
-      "description": "Démarrer une nouvelle analyse épidémiologique",
+      "description": "DÃ©marrer une nouvelle analyse Ã©pidÃ©miologique",
       "url": "/index.html",
       "icons": [
         {

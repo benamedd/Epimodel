@@ -1,0 +1,1111 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EpiModel - Epidemiological Modeling</title>
+    <style>
+        /* Reset and Variables */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #2e7d32;
+            --secondary-color: #66bb6a;
+            --accent-color: #1b5e20;
+            --bg-color: #f5f5f5;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --border-color: #e0e0e0;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+            color: white;
+            padding: 1.5rem 0;
+            box-shadow: var(--shadow);
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .subtitle {
+            font-size: 0.9rem;
+            opacity: 0.95;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+            width: 100%;
+        }
+
+        main.container {
+            flex: 1;
+            padding: 2rem 1rem;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        .card h2 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            font-size: 1.4rem;
+        }
+
+        .card h3 {
+            color: var(--accent-color);
+            margin: 1rem 0 0.75rem 0;
+            font-size: 1.1rem;
+        }
+
+        /* Input Methods */
+        .input-method {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .input-method label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1rem;
+        }
+
+        thead {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .day-input, .disease-input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 0.5rem 0.5rem 0.5rem 0;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--accent-color);
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-remove {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        /* File Upload */
+        .file-upload {
+            text-align: center;
+            padding: 2rem;
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
+        }
+
+        /* Model Selection */
+        .model-checkboxes {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 3rem;
+        }
+
+        .spinner {
+            border: 4px solid var(--border-color);
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Results */
+        .recommendation {
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            border-left: 4px solid var(--primary-color);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+
+        .chart-container {
+            margin: 2rem 0;
+            padding: 1rem;
+            background: white;
+            border-radius: 8px;
+        }
+
+        #model-chart {
+            max-width: 100%;
+            height: 400px !important;
+        }
+
+        .parameters {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .param-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px dashed var(--border-color);
+        }
+
+        .param-value {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        /* Footer */
+        .footer {
+            background-color: var(--primary-color);
+            color: white;
+            text-align: center;
+            padding: 1.5rem;
+            margin-top: auto;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            .card {
+                padding: 1rem;
+            }
+            #model-chart {
+                height: 300px !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <h1>🌿 EpiModel</h1>
+            <p class="subtitle">Epidemiological Modeling for Plant Pathology</p>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="container">
+        <!-- Section 1: Data Input -->
+        <section class="card" id="data-input-section">
+            <h2>📊 Data Input</h2>
+            
+            <div class="input-method">
+                <label>
+                    <input type="radio" name="input-method" value="manual" checked>
+                    Manual Entry
+                </label>
+                <label>
+                    <input type="radio" name="input-method" value="file">
+                    Import CSV
+                </label>
+            </div>
+
+            <!-- Manual Input -->
+            <div id="manual-input" class="input-area">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Day</th>
+                            <th>Disease %</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="data-body">
+                        <tr>
+                            <td><input type="number" class="day-input" value="0" min="0"></td>
+                            <td><input type="number" class="disease-input" value="5" min="0" max="100" step="0.1"></td>
+                            <td><button class="btn-remove" onclick="removeRow(this)">❌</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <button class="btn btn-secondary" onclick="addRow()">➕ Add Row</button>
+            </div>
+
+            <!-- CSV Import -->
+            <div id="file-input" class="input-area" style="display: none;">
+                <div class="file-upload">
+                    <label for="csv-file">
+                        📁 Choose CSV File
+                        <input type="file" id="csv-file" accept=".csv" onchange="handleFileUpload(event)" style="display:none;">
+                    </label>
+                    <p>Format: day,percentage (e.g., 0,5.2)</p>
+                </div>
+            </div>
+
+            <div>
+                <button class="btn btn-primary" onclick="analyzeData()">🔬 Analyze</button>
+                <button class="btn btn-secondary" onclick="clearData()">🗑️ Clear</button>
+            </div>
+        </section>
+
+        <!-- Section 2: Model Selection -->
+        <section class="card" id="model-selection-section" style="display: none;">
+            <h2>📈 Model Selection</h2>
+            <div class="model-checkboxes">
+                <label class="checkbox-label">
+                    <input type="checkbox" name="model" value="exponential" checked>
+                    Exponential
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" name="model" value="monomolecular" checked>
+                    Monomolecular
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" name="model" value="logistic" checked>
+                    Logistic
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" name="model" value="gompertz" checked>
+                    Gompertz
+                </label>
+            </div>
+            <button class="btn btn-primary" onclick="runModels()">▶️ Run Analysis</button>
+        </section>
+
+        <!-- Section 3: Results -->
+        <section class="card" id="results-section" style="display: none;">
+            <h2>🏆 Results</h2>
+            
+            <div id="loading" class="loading" style="display: none;">
+                <div class="spinner"></div>
+                <p>Analysis in progress...</p>
+            </div>
+
+            <div id="results-content" style="display: none;">
+                <!-- Comparison Table -->
+                <div>
+                    <h3>Model Comparison</h3>
+                    <table id="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Model</th>
+                                <th>R²</th>
+                                <th>RMSE</th>
+                                <th>AIC</th>
+                                <th>BIC</th>
+                                <th>Score</th>
+                            </tr>
+                        </thead>
+                        <tbody id="comparison-body"></tbody>
+                    </table>
+                </div>
+
+                <!-- Recommendation -->
+                <div class="recommendation" id="recommendation"></div>
+
+                <!-- Chart -->
+                <div class="chart-container">
+                    <h3>Fitted Curves</h3>
+                    <canvas id="model-chart"></canvas>
+                </div>
+
+                <!-- Parameters -->
+                <div class="parameters" id="parameters"></div>
+
+                <!-- Export Buttons -->
+                <div>
+                    <button class="btn btn-primary" onclick="exportPDF()">📄 Export PDF</button>
+                    <button class="btn btn-secondary" onclick="exportData()">💾 Export Data</button>
+                    <button class="btn btn-secondary" onclick="resetApp()">🔄 New Analysis</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>EpiModel v1.0 - Epidemiological Modeling © 2025</p>
+    </footer>
+
+    <!-- External Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <!-- Main Application Script -->
+    <script>
+        // Global variables
+        let dataPoints = [];
+        let modelResults = [];
+        let chartInstance = null;
+
+        // Input method toggle
+        document.querySelectorAll('input[name="input-method"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                const manual = document.getElementById('manual-input');
+                const file = document.getElementById('file-input');
+                if (e.target.value === 'manual') {
+                    manual.style.display = 'block';
+                    file.style.display = 'none';
+                } else {
+                    manual.style.display = 'none';
+                    file.style.display = 'block';
+                }
+            });
+        });
+
+        // Add row
+        function addRow() {
+            const tbody = document.getElementById('data-body');
+            const lastRow = tbody.lastElementChild;
+            const lastDay = lastRow ? parseInt(lastRow.querySelector('.day-input').value) : 0;
+            
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td><input type="number" class="day-input" value="${lastDay + 7}" min="0"></td>
+                <td><input type="number" class="disease-input" value="0" min="0" max="100" step="0.1"></td>
+                <td><button class="btn-remove" onclick="removeRow(this)">❌</button></td>
+            `;
+            tbody.appendChild(newRow);
+        }
+
+        // Remove row
+        function removeRow(btn) {
+            const tbody = document.getElementById('data-body');
+            if (tbody.children.length > 1) {
+                btn.closest('tr').remove();
+            } else {
+                alert('You must keep at least one data row!');
+            }
+        }
+
+        // Handle CSV upload
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const content = e.target.result;
+                parseCSV(content);
+            };
+            reader.readAsText(file);
+        }
+
+        // Parse CSV
+        function parseCSV(content) {
+            const lines = content.split('\n').filter(line => line.trim());
+            const tbody = document.getElementById('data-body');
+            tbody.innerHTML = '';
+            
+            lines.forEach((line, index) => {
+                if (index === 0 && (line.toLowerCase().includes('day') || line.toLowerCase().includes('jour'))) {
+                    return;
+                }
+                
+                const [day, disease] = line.split(/[,;\t]/).map(s => s.trim());
+                if (day && disease && !isNaN(day) && !isNaN(disease)) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td><input type="number" class="day-input" value="${day}" min="0"></td>
+                        <td><input type="number" class="disease-input" value="${disease}" min="0" max="100" step="0.1"></td>
+                        <td><button class="btn-remove" onclick="removeRow(this)">❌</button></td>
+                    `;
+                    tbody.appendChild(row);
+                }
+            });
+            
+            alert(`${tbody.children.length} rows imported successfully!`);
+        }
+
+        // Clear data
+        function clearData() {
+            if (confirm('Do you really want to clear all data?')) {
+                const tbody = document.getElementById('data-body');
+                tbody.innerHTML = `
+                    <tr>
+                        <td><input type="number" class="day-input" value="0" min="0"></td>
+                        <td><input type="number" class="disease-input" value="5" min="0" max="100" step="0.1"></td>
+                        <td><button class="btn-remove" onclick="removeRow(this)">❌</button></td>
+                    </tr>
+                `;
+            }
+        }
+
+        // Analyze data
+        function analyzeData() {
+            const rows = document.querySelectorAll('#data-body tr');
+            dataPoints = [];
+            
+            rows.forEach(row => {
+                const day = parseFloat(row.querySelector('.day-input').value);
+                const disease = parseFloat(row.querySelector('.disease-input').value);
+                
+                if (!isNaN(day) && !isNaN(disease) && disease >= 0 && disease <= 100) {
+                    dataPoints.push({ x: day, y: disease / 100 });
+                }
+            });
+            
+            if (dataPoints.length < 4) {
+                alert('You need at least 4 data points for analysis!');
+                return;
+            }
+            
+            dataPoints.sort((a, b) => a.x - b.x);
+            
+            document.getElementById('data-input-section').style.display = 'none';
+            document.getElementById('model-selection-section').style.display = 'block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Run models
+        function runModels() {
+            const selectedModels = [];
+            document.querySelectorAll('input[name="model"]:checked').forEach(checkbox => {
+                selectedModels.push(checkbox.value);
+            });
+            
+            if (selectedModels.length === 0) {
+                alert('Please select at least one model!');
+                return;
+            }
+            
+            document.getElementById('model-selection-section').style.display = 'none';
+            document.getElementById('results-section').style.display = 'block';
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('results-content').style.display = 'none';
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            setTimeout(() => {
+                performAnalysis(selectedModels);
+            }, 1000);
+        }
+
+        // Perform analysis
+        function performAnalysis(selectedModels) {
+            modelResults = [];
+            
+            if (selectedModels.includes('exponential')) {
+                modelResults.push(fitExponential());
+            }
+            if (selectedModels.includes('monomolecular')) {
+                modelResults.push(fitMonomolecular());
+            }
+            if (selectedModels.includes('logistic')) {
+                modelResults.push(fitLogistic());
+            }
+            if (selectedModels.includes('gompertz')) {
+                modelResults.push(fitGompertz());
+            }
+            
+            modelResults.sort((a, b) => a.aic - b.aic);
+            modelResults.forEach((model, index) => {
+                model.rank = index + 1;
+            });
+            
+            displayResults();
+        }
+
+        // Exponential model
+        function fitExponential() {
+            const n = dataPoints.length;
+            let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+            
+            dataPoints.forEach(point => {
+                if (point.y > 0 && point.y < 1) {
+                    const lnY = Math.log(point.y);
+                    sumX += point.x;
+                    sumY += lnY;
+                    sumXY += point.x * lnY;
+                    sumX2 += point.x * point.x;
+                }
+            });
+            
+            const r = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+            const lnY0 = (sumY - r * sumX) / n;
+            const y0 = Math.exp(lnY0);
+            
+            const predictions = dataPoints.map(point => ({
+                x: point.x,
+                y: y0 * Math.exp(r * point.x)
+            }));
+            
+            const metrics = calculateMetrics(predictions, 2);
+            
+            return {
+                name: 'Exponential',
+                params: { y0, r },
+                predictions,
+                ...metrics
+            };
+        }
+
+        // Monomolecular model
+        function fitMonomolecular() {
+            const n = dataPoints.length;
+            let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+            
+            dataPoints.forEach(point => {
+                if (point.y < 1) {
+                    const lnComp = Math.log(1 - point.y);
+                    sumX += point.x;
+                    sumY += lnComp;
+                    sumXY += point.x * lnComp;
+                    sumX2 += point.x * point.x;
+                }
+            });
+            
+            const r = -(n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+            const lnComp0 = (sumY + r * sumX) / n;
+            const y0 = 1 - Math.exp(lnComp0);
+            
+            const predictions = dataPoints.map(point => ({
+                x: point.x,
+                y: 1 - (1 - y0) * Math.exp(-r * point.x)
+            }));
+            
+            const metrics = calculateMetrics(predictions, 2);
+            
+            return {
+                name: 'Monomolecular',
+                params: { y0, r },
+                predictions,
+                ...metrics
+            };
+        }
+
+        // Logistic model
+        function fitLogistic() {
+            const n = dataPoints.length;
+            let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+            
+            dataPoints.forEach(point => {
+                if (point.y > 0 && point.y < 1) {
+                    const logit = Math.log(point.y / (1 - point.y));
+                    sumX += point.x;
+                    sumY += logit;
+                    sumXY += point.x * logit;
+                    sumX2 += point.x * point.x;
+                }
+            });
+            
+            const r = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+            const logit0 = (sumY - r * sumX) / n;
+            const y0 = 1 / (1 + Math.exp(-logit0));
+            
+            const predictions = dataPoints.map(point => ({
+                x: point.x,
+                y: 1 / (1 + ((1 - y0) / y0) * Math.exp(-r * point.x))
+            }));
+            
+            const metrics = calculateMetrics(predictions, 2);
+            
+            return {
+                name: 'Logistic',
+                params: { y0, r },
+                predictions,
+                ...metrics
+            };
+        }
+
+        // Gompertz model
+        function fitGompertz() {
+            const n = dataPoints.length;
+            let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+            
+            dataPoints.forEach(point => {
+                if (point.y > 0 && point.y < 1) {
+                    const gompertz = Math.log(-Math.log(point.y));
+                    sumX += point.x;
+                    sumY += gompertz;
+                    sumXY += point.x * gompertz;
+                    sumX2 += point.x * point.x;
+                }
+            });
+            
+            const r = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+            const gomp0 = (sumY - r * sumX) / n;
+            const y0 = Math.exp(-Math.exp(gomp0));
+            
+            const predictions = dataPoints.map(point => ({
+                x: point.x,
+                y: Math.exp(-Math.exp(Math.log(-Math.log(y0)) + r * point.x))
+            }));
+            
+            const metrics = calculateMetrics(predictions, 2);
+            
+            return {
+                name: 'Gompertz',
+                params: { y0, r },
+                predictions,
+                ...metrics
+            };
+        }
+
+        // Calculate metrics
+        function calculateMetrics(predictions, numParams) {
+            const n = dataPoints.length;
+            const meanY = dataPoints.reduce((sum, point) => sum + point.y, 0) / n;
+            
+            let ssTotal = 0, ssRes = 0;
+            dataPoints.forEach((point, i) => {
+                const observed = point.y;
+                const predicted = predictions[i].y;
+                ssTotal += Math.pow(observed - meanY, 2);
+                ssRes += Math.pow(observed - predicted, 2);
+            });
+            
+            const r2 = 1 - (ssRes / ssTotal);
+            const rmse = Math.sqrt(ssRes / n) * 100;
+            const sigma2 = ssRes / n;
+            const logLikelihood = -n / 2 * Math.log(2 * Math.PI * sigma2) - ssRes / (2 * sigma2);
+            const aic = 2 * numParams - 2 * logLikelihood;
+            const bic = numParams * Math.log(n) - 2 * logLikelihood;
+            
+            return {
+                r2: Math.max(0, Math.min(1, r2)),
+                rmse,
+                aic,
+                bic,
+                ssRes
+            };
+        }
+
+        // Display results
+        function displayResults() {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('results-content').style.display = 'block';
+            displayComparisonTable();
+            displayRecommendation();
+            displayChart();
+            displayParameters();
+        }
+
+        // Display comparison table
+        function displayComparisonTable() {
+            const tbody = document.getElementById('comparison-body');
+            tbody.innerHTML = '';
+            
+            const medals = ['🥇', '🥈', '🥉'];
+            
+            modelResults.forEach((model, index) => {
+                const stars = 5 - index;
+                const starsHTML = '⭐'.repeat(Math.max(1, stars));
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${medals[index] || (index + 1)}</td>
+                    <td><strong>${model.name}</strong></td>
+                    <td>${model.r2.toFixed(3)}</td>
+                    <td>${model.rmse.toFixed(2)}%</td>
+                    <td>${model.aic.toFixed(1)}</td>
+                    <td>${model.bic.toFixed(1)}</td>
+                    <td>${starsHTML}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Display recommendation
+        function displayRecommendation() {
+            const best = modelResults[0];
+            const second = modelResults[1];
+            const deltaAIC = second.aic - best.aic;
+            
+            let significance = '';
+            if (deltaAIC > 10) {
+                significance = 'very significantly';
+            } else if (deltaAIC > 4) {
+                significance = 'significantly';
+            } else {
+                significance = 'slightly';
+            }
+            
+            const html = `
+                <h3>💡 Recommendation</h3>
+                <p>The <strong>${best.name}</strong> model is ${significance} better than the other tested models.</p>
+                <p><strong>Key Criteria:</strong></p>
+                <ul>
+                    <li>R² = ${best.r2.toFixed(3)} (explains ${(best.r2 * 100).toFixed(1)}% of variability)</li>
+                    <li>RMSE = ${best.rmse.toFixed(2)}% (average prediction error)</li>
+                    <li>ΔAIC = ${deltaAIC.toFixed(1)} compared to 2nd best model</li>
+                </ul>
+                <p><strong>Interpretation:</strong> ${getModelInterpretation(best)}</p>
+            `;
+            
+            document.getElementById('recommendation').innerHTML = html;
+        }
+
+        // Model interpretation
+        function getModelInterpretation(model) {
+            const r = model.params.r;
+            const y0Percent = (model.params.y0 * 100).toFixed(1);
+            
+            let speed = '';
+            if (Math.abs(r) < 0.05) speed = 'slow';
+            else if (Math.abs(r) < 0.15) speed = 'moderate';
+            else speed = 'rapid';
+            
+            let interpretation = `This epidemic shows ${speed} progression (r = ${r.toFixed(3)}/day) from an initial inoculum of ${y0Percent}%. `;
+            
+            if (model.name === 'Exponential') {
+                interpretation += 'Exponential growth suggests an early epidemic phase without resource limitation.';
+            } else if (model.name === 'Monomolecular') {
+                interpretation += 'The monomolecular model indicates a monocyclic disease with constant primary inoculum.';
+            } else if (model.name === 'Logistic') {
+                interpretation += 'The symmetrical sigmoid curve is typical of polycyclic diseases with maximum rate at 50% incidence.';
+            } else if (model.name === 'Gompertz') {
+                interpretation += 'The asymmetric curve indicates rapid acceleration followed by progressive slowdown, typical of viral epidemics. Maximum rate occurs around 37% incidence.';
+            }
+            
+            return interpretation;
+        }
+
+        // Display chart
+        function displayChart() {
+            const ctx = document.getElementById('model-chart').getContext('2d');
+            
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+            
+            const datasets = [
+                {
+                    label: 'Observed Data',
+                    data: dataPoints.map(p => ({ x: p.x, y: p.y * 100 })),
+                    backgroundColor: 'rgba(46, 125, 50, 0.8)',
+                    borderColor: 'rgba(46, 125, 50, 1)',
+                    borderWidth: 2,
+                    pointRadius: 6,
+                    pointHoverRadius: 8,
+                    type: 'scatter'
+                }
+            ];
+            
+            const colors = [
+                'rgba(33, 150, 243, 1)',
+                'rgba(255, 152, 0, 1)',
+                'rgba(156, 39, 176, 1)',
+                'rgba(233, 30, 99, 1)'
+            ];
+            
+            modelResults.forEach((model, index) => {
+                datasets.push({
+                    label: model.name,
+                    data: model.predictions.map(p => ({ x: p.x, y: p.y * 100 })),
+                    borderColor: colors[index],
+                    backgroundColor: 'transparent',
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    tension: 0.4,
+                    type: 'line'
+                });
+            });
+            
+            chartInstance = new Chart(ctx, {
+                data: { datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Epidemiological Model Comparison',
+                            font: { size: 16, weight: 'bold' }
+                        },
+                        legend: {
+                            display: true,
+                            position: 'bottom'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${context.parsed.y.toFixed(1)}%`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            title: {
+                                display: true,
+                                text: 'Time (days)',
+                                font: { size: 14, weight: 'bold' }
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Disease Incidence (%)',
+                                font: { size: 14, weight: 'bold' }
+                            },
+                            min: 0,
+                            max: 100,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Display parameters
+        function displayParameters() {
+            const best = modelResults[0];
+            const y0Percent = (best.params.y0 * 100).toFixed(2);
+            const r = best.params.r.toFixed(4);
+            
+            let doublingTime = '';
+            if (best.name === 'Exponential' || best.name === 'Logistic') {
+                const td = Math.log(2) / Math.abs(best.params.r);
+                doublingTime = `<div class="param-item">
+                    <span>Doubling time:</span>
+                    <span class="param-value">${td.toFixed(1)} days</span>
+                </div>`;
+            }
+            
+            const html = `
+                <h3>📊 ${best.name} Model Parameters</h3>
+                <div class="param-item">
+                    <span>Initial inoculum (y₀):</span>
+                    <span class="param-value">${y0Percent}%</span>
+                </div>
+                <div class="param-item">
+                    <span>Infection rate (r):</span>
+                    <span class="param-value">${r} /day</span>
+                </div>
+                ${doublingTime}
+                <div class="param-item">
+                    <span>R² coefficient:</span>
+                    <span class="param-value">${best.r2.toFixed(3)}</span>
+                </div>
+                <div class="param-item">
+                    <span>RMSE:</span>
+                    <span class="param-value">${best.rmse.toFixed(2)}%</span>
+                </div>
+                <div class="param-item">
+                    <span>AIC:</span>
+                    <span class="param-value">${best.aic.toFixed(1)}</span>
+                </div>
+                <div class="param-item">
+                    <span>BIC:</span>
+                    <span class="param-value">${best.bic.toFixed(1)}</span>
+                </div>
+            `;
+            
+            document.getElementById('parameters').innerHTML = html;
+        }
+
+        // Export PDF
+        async function exportPDF() {
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            
+            // Page 1: Title and table
+            pdf.setFontSize(20);
+            pdf.setTextColor(46, 125, 50);
+            pdf.text('EpiModel - Analysis Report', 105, 20, { align: 'center' });
+            
+            pdf.setFontSize(12);
+            pdf.setTextColor(0, 0, 0);
+            pdf.text(`Date: ${new Date().toLocaleDateString('en-US')}`, 20, 35);
+            pdf.text(`Number of points: ${dataPoints.length}`, 20, 42);
+            
+            // Comparison table
+            pdf.setFontSize(14);
+            pdf.setTextColor(46, 125, 50);
+            pdf.text('Model Comparison', 20, 55);
+            
+            let yPos = 65;
+            pdf.setFontSize(10);
+            pdf.setTextColor(0, 0, 0);
+            pdf.text('Rank', 20, yPos);
+            pdf.text('Model', 40, yPos);
+            pdf.text('R²', 80, yPos);
+            pdf.text('RMSE', 105, yPos);
+            pdf.text('AIC', 130, yPos);
+            pdf.text('BIC', 155, yPos);
+            
+            yPos += 7;
+            modelResults.forEach((model, index) => {
+                pdf.text(`${index + 1}`, 20, yPos);
+                pdf.text(model.name, 40, yPos);
+                pdf.text(model.r2.toFixed(3), 80, yPos);
+                pdf.text(model.rmse.toFixed(2) + '%', 105, yPos);
+                pdf.text(model.aic.toFixed(1), 130, yPos);
+                pdf.text(model.bic.toFixed(1), 155, yPos);
+                yPos += 7;
+            });
+            
+            // Recommendation
+            yPos += 10;
+            pdf.setFontSize(14);
+            pdf.setTextColor(46, 125, 50);
+            pdf.text('Recommendation', 20, yPos);
+            
+            yPos += 10;
+            pdf.setFontSize(10);
+            pdf.setTextColor(0, 0, 0);
+            const best = modelResults[0];
+            pdf.text(`Best model: ${best.name}`, 20, yPos);
+            yPos += 7;
+            pdf.text(`R² = ${best.r2.toFixed(3)}`, 20, yPos);
+            yPos += 7;
+            pdf.text(`RMSE = ${best.rmse.toFixed(2)}%`, 20, yPos);
+            
+            // Chart (new page)
+            pdf.addPage();
+            pdf.setFontSize(14);
+            pdf.setTextColor(46, 125, 50);
+            pdf.text('Model Charts', 105, 20, { align: 'center' });
+            
+            const canvas = document.getElementById('model-chart');
+            const imgData = canvas.toDataURL('image/png');
+            pdf.addImage(imgData, 'PNG', 20, 30, 170, 120);
+            
+            // Parameters (new page)
+            pdf.addPage();
+            pdf.setFontSize(14);
+            pdf.setTextColor(46, 125, 50);
+            pdf.text(`${best.name} Model Parameters`, 20, 20);
+            
+            yPos = 35;
+            pdf.setFontSize(10);
+            pdf.setTextColor(0, 0, 0);
+            pdf.text(`Initial inoculum (y₀): ${(best.params.y0 * 100).toFixed(2)}%`, 20, yPos);
+            yPos += 10;
+            pdf.text(`Infection rate (r): ${best.params.r.toFixed(4)} /day`, 20, yPos);
+            yPos += 10;
+            pdf.text(`R²: ${best.r2.toFixed(3)}`, 20, yPos);
+            yPos += 10;
+            pdf.text(`RMSE: ${best.rmse.toFixed(2)}%`, 20, yPos);
+            yPos += 10;
+            pdf.text(`AIC: ${best.aic.toFixed(1)}`, 20, yPos);
+            yPos += 10;
+            pdf.text(`BIC: ${best.bic.toFixed(1)}`, 20, yPos);
+            
+            pdf.save('epimodel-report.pdf');
+        }
+
+        // Export data
+        function exportData() {
+            const best = modelResults[0];
+            
+            let csv = 'Day,Observed(%),Predicted(%)\n';
+            dataPoints.forEach((point, i) => {
+                csv += `${point.x},${(point.y * 100).toFixed(2)},${(best.predictions[i].y * 100).toFixed(2)}\n`;
+            });
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'epimodel-data.csv';
+            a.click();
+        }
+
+        // Reset app
+        function resetApp() {
+            if (confirm('Do you want to start a new analysis?')) {
+                location.reload();
+            }
+        }
+
+        // Debug: Check if everything is loaded
+        window.addEventListener('load', function() {
+            console.log('✅ Page loaded');
+            console.log('Chart.js loaded:', typeof Chart !== 'undefined' ? '✅' : '❌');
+            console.log('jsPDF loaded:', typeof jspdf !== 'undefined' ? '✅' : '❌');
+            console.log('Functions loaded:', typeof addRow !== 'undefined' ? '✅' : '❌');
+        });
+    </script>
+</body>
+</html>

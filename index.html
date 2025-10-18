@@ -1,9 +1,25 @@
-﻿<!DOCTYPE html>
-<html lang="en">
+﻿ <!DOCTYPE html>
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Application d'analyse épidémiologique pour la pathologie végétale">
+    <meta name="theme-color" content="#2e7d32">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="EpiModel">
+    
     <title>EpiModel - Epidemiological Modeling</title>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    
+    <!-- Icons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32x32.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192x192.png">
+    <link rel="apple-touch-icon" href="/icons/icon-180x180.png">
+    
     <style>
         /* Reset and Variables */
         * {
@@ -31,6 +47,44 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+        }
+
+        /* Install Banner */
+        .install-banner {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+            color: white;
+            padding: 1rem;
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+
+        .install-banner.show {
+            display: flex;
+        }
+
+        .install-banner button {
+            background: white;
+            color: var(--primary-color);
+            border: none;
+            padding: 0.5rem 1.5rem;
+            border-radius: 20px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-left: 1rem;
+        }
+
+        .install-banner .close-btn {
+            background: transparent;
+            color: white;
+            padding: 0.5rem;
+            font-size: 1.2rem;
         }
 
         /* Header */
@@ -267,6 +321,18 @@
     </style>
 </head>
 <body>
+    <!-- Install Banner -->
+    <div class="install-banner" id="install-banner">
+        <div>
+            <strong>📱 Installer EpiModel</strong>
+            <p style="font-size: 0.9rem; margin-top: 0.25rem;">Installez l'application pour un accès rapide et hors ligne</p>
+        </div>
+        <div>
+            <button id="install-btn">Installer</button>
+            <button class="close-btn" id="close-install">✕</button>
+        </div>
+    </div>
+
     <!-- Header -->
     <header class="header">
         <div class="container">
@@ -414,6 +480,67 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <!-- PWA Registration Script -->
+    <script>
+        // Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then((registration) => {
+                        console.log('✅ Service Worker enregistré:', registration.scope);
+                        
+                        // Vérifier les mises à jour
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    if (confirm('Une nouvelle version est disponible. Recharger?')) {
+                                        newWorker.postMessage({ type: 'SKIP_WAITING' });
+                                        window.location.reload();
+                                    }
+                                }
+                            });
+                        });
+                    })
+                    .catch((error) => {
+                        console.error('❌ Erreur Service Worker:', error);
+                    });
+            });
+        }
+
+        // Installation PWA
+        let deferredPrompt;
+        const installBanner = document.getElementById('install-banner');
+        const installBtn = document.getElementById('install-btn');
+        const closeInstallBtn = document.getElementById('close-install');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installBanner.classList.add('show');
+        });
+
+        installBtn.addEventListener('click', async () => {
+            if (!deferredPrompt) return;
+            
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            
+            console.log(`Installation: ${outcome}`);
+            deferredPrompt = null;
+            installBanner.classList.remove('show');
+        });
+
+        closeInstallBtn.addEventListener('click', () => {
+            installBanner.classList.remove('show');
+        });
+
+        window.addEventListener('appinstalled', () => {
+            console.log('✅ PWA installée avec succès');
+            deferredPrompt = null;
+        });
+    </script>
 
     <!-- Main Application Script -->
     <script>
@@ -989,7 +1116,6 @@
             const { jsPDF } = window.jspdf;
             const pdf = new jsPDF('p', 'mm', 'a4');
             
-            // Page 1: Title and table
             pdf.setFontSize(20);
             pdf.setTextColor(46, 125, 50);
             pdf.text('EpiModel - Analysis Report', 105, 20, { align: 'center' });
@@ -999,7 +1125,6 @@
             pdf.text(`Date: ${new Date().toLocaleDateString('en-US')}`, 20, 35);
             pdf.text(`Number of points: ${dataPoints.length}`, 20, 42);
             
-            // Comparison table
             pdf.setFontSize(14);
             pdf.setTextColor(46, 125, 50);
             pdf.text('Model Comparison', 20, 55);
@@ -1025,7 +1150,6 @@
                 yPos += 7;
             });
             
-            // Recommendation
             yPos += 10;
             pdf.setFontSize(14);
             pdf.setTextColor(46, 125, 50);
@@ -1041,7 +1165,6 @@
             yPos += 7;
             pdf.text(`RMSE = ${best.rmse.toFixed(2)}%`, 20, yPos);
             
-            // Chart (new page)
             pdf.addPage();
             pdf.setFontSize(14);
             pdf.setTextColor(46, 125, 50);
@@ -1051,7 +1174,6 @@
             const imgData = canvas.toDataURL('image/png');
             pdf.addImage(imgData, 'PNG', 20, 30, 170, 120);
             
-            // Parameters (new page)
             pdf.addPage();
             pdf.setFontSize(14);
             pdf.setTextColor(46, 125, 50);
@@ -1098,14 +1220,6 @@
                 location.reload();
             }
         }
-
-        // Debug: Check if everything is loaded
-        window.addEventListener('load', function() {
-            console.log('✅ Page loaded');
-            console.log('Chart.js loaded:', typeof Chart !== 'undefined' ? '✅' : '❌');
-            console.log('jsPDF loaded:', typeof jspdf !== 'undefined' ? '✅' : '❌');
-            console.log('Functions loaded:', typeof addRow !== 'undefined' ? '✅' : '❌');
-        });
     </script>
 </body>
 </html>
